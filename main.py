@@ -110,7 +110,7 @@ class basic_enemy:
                     length = max(1, (dir_x ** 2 + dir_y ** 2) ** 0.5)
                     dir_x /= length
                     dir_y /= length
-                    bullets.append(Bullet(enemy_centerx, enemy_centery, dir_x , dir_y,2))
+                    bullets.append(Bullet_enimi(enemy_centerx, enemy_centery, dir_x , dir_y,2))
                     self.last_shoted = self.corent_time
         self.rect = pygame.Rect(self.x, self.y, 50, 100)
         pygame.draw.rect(screen, self.coler, self.rect)
@@ -153,6 +153,33 @@ class Bullet:
         self.speed = 3
         self.radius = 5
         self.color = (255, 255, 0) if self.tipe == 1 else (255, 50, 50)
+        global particals
+
+    def update(self, screen, env_x, env_y):
+        self.life -= 5
+        self.x += self.dir_x * self.speed
+        self.y += self.dir_y * self.speed
+        self.x -= env_x
+        self.y -= env_y
+        
+        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
+        if len(particals) < 500:
+            for i in range(self.life):
+                particals.append(partical(self.x, self.y, 255, 255, 0,lifspand=random.randint(1, 20)))
+bullets = []
+
+class Bullet_enimi:
+    def __init__(self, x, y, dir_x, dir_y,tipe):
+        self.life = 150
+        self.tipe = tipe
+        self.x = x
+        self.y = y
+        self.dir_x = dir_x
+        self.dir_y = dir_y
+        self.speed = 3
+        self.radius = 5
+        self.color = (255, 255, 0) if self.tipe == 1 else (255, 50, 50)
+        global particals
 
     def update(self, screen, env_x, env_y):
         self.life -= 5
@@ -163,7 +190,8 @@ class Bullet:
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
         for i in range(self.life):
             particals.append(partical(self.x, self.y, 255, 255, 0,lifspand=random.randint(1, 20)))
-bullets = []
+
+bullets_enimi = []
 
 grass_list = []
 for i in range(150):
@@ -255,33 +283,37 @@ while running:
         if partical_i.lifspand <= 0:
             particals.remove(partical_i)
     for bullet in bullets[:]:
-        bullet.update(screen, envirement_x + offset_x, envirement_y + offset_y)
-
-        if bullet.x < -2000 or bullet.x > 2000 or bullet.y < -2000 or bullet.y > 2000:
-            bullets.remove(bullet)
-        if bullet.tipe == 1:
-            for enemy in enimies[:]:
-                if enemy.rect.colliderect(pygame.Rect(bullet.x - envirement_x + offset_x, bullet.y - envirement_y + offset_y, bullet.radius * 2, bullet.radius * 2)):
-                    for _ in range(10):
-                        particals.append(partical(bullet.x, bullet.y, 255, 255, 0))
+        if bullet:
+            if bullet.x > window_size[0] or bullet.x < 0 or bullet.y > window_size[1] or bullet.y < 0:
+                if bullets:
                     bullets.remove(bullet)
-
-                    enemy.life -= 40
-                    if enemy.life <= 0:
-                        for _ in range(400):
-                            particals.append(partical(random.randint(int(enemy.x),int(enemy.x)+50), random.randint(int(enemy.y),int(enemy.y)+100), 150, 0, 0,lifspand=random.randint(50, 500), speed=2.01))
-                        enemy.color = (255, 0, 0)
-                        enimies.remove(enemy)
-                        shake_intensity = 1
-                        shake_time = 100
-                        enimies.append(basic_enemy())
-                    break
-        elif 2:
-            if pleyer.colliderect(pygame.Rect(bullet.x - envirement_x + offset_x, bullet.y - envirement_y + offset_y, bullet.radius * 2, bullet.radius * 2)):
+        bullet.update(screen, envirement_x + offset_x, envirement_y + offset_y)
+        for enemy in enimies[:]:
+            if enemy.rect.colliderect(pygame.Rect(bullet.x - envirement_x + offset_x, bullet.y - envirement_y + offset_y, bullet.radius * 2, bullet.radius * 2)):
                 for _ in range(10):
                     particals.append(partical(bullet.x, bullet.y, 255, 255, 0))
-                bullets.remove(bullet)
-                shake_time = 150
+
+                enemy.life -= 40
+                if enemy.life <= 0:
+                    for _ in range(400):
+                        particals.append(partical(random.randint(int(enemy.x),int(enemy.x)+50), random.randint(int(enemy.y),int(enemy.y)+100), 150, 0, 0,lifspand=random.randint(50, 500), speed=2.01))
+                    enemy.color = (255, 0, 0)
+                    enimies.remove(enemy)
+                    shake_intensity = 1
+                    shake_time = 100
+                    enimies.append(basic_enemy())
+                break
+
+    for bullet in bullets_enimi[:]:
+        bullets_enimi.update(screen, envirement_x + offset_x, envirement_y + offset_y)
+        if bullet.x < -2000 or bullet.x > 2000 or bullet.y < -2000 or bullet.y > 2000:
+            bullets.remove(bullet)
+
+        if pleyer.colliderect(pygame.Rect(bullet.x - envirement_x + offset_x, bullet.y - envirement_y + offset_y, bullet.radius * 2, bullet.radius * 2)):
+            for _ in range(10):
+                particals.append(partical(bullet.x, bullet.y, 255, 255, 0))
+            bullets.remove(bullet)
+            shake_time = 150
 
     x = (window_size[0] // 2 - 25) + offset_x
     y = (window_size[1] // 2 - 50) + offset_y
@@ -296,7 +328,9 @@ while running:
 
     pygame.draw.circle(screen, (0, 0, 255), (mouse_x, mouse_y), 5)  
     pygame.draw.circle(screen, (255, 0, 255), (world_mouse_pos[0] - envirement_x, world_mouse_pos[1] - envirement_y), 5)
-
+    #pleyer_detecsen2 = pygame.Rect(x-500, y-450, 1000, 1000)
+    #pygame.draw.rect(screen, (255, 255, 255), pleyer_detecsen2)
+    
     envirement_y = (envirement_y / 1.05)
     envirement_x = (envirement_x / 1.05)
     
