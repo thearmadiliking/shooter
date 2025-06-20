@@ -535,6 +535,9 @@ while running:
     health_bar_height = 20
     health_bar_coler = (255, 0, 0) if pleyer_life <= pleyer_max_life / 2 else (0, 255, 0)
     draw_health_bar(screen, health_bar_x, health_bar_y, health_bar_width, health_bar_height, pleyer_life / pleyer_max_life, fill_color=health_bar_coler)
+    font = pygame.font.SysFont("comicsansms", 50)
+    points_text = font.render(f"points: {round(coins_count)}", True, (255, 255, 0))
+    screen.blit(points_text, (window_size[0] - points_text.get_width() - 20, 20))
     if pleyer_life <= 0:
         font = pygame.font.Font(None, 74)
         screen.fill((0, 0, 0))
