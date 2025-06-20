@@ -9,6 +9,7 @@ from screeninfo import get_monitors
 window_size = (800, 600)
 monitor = get_monitors()[0]
 window_size = (monitor.width, monitor.height)
+window_size = (800, 600)
 screen = pygame.display.set_mode(window_size)
 screen = pygame.display.set_mode(window_size)
 pygame.display.set_caption("Pygame Window")
